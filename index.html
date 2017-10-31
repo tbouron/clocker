@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Home</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h2 id="what-is-it">What is it?</h2>
+<p>Clocker for <a href="https://brooklyn.apache.org/">Apache Brooklyn</a> is a set of open source tools designed to make working with <a href="https://www.docker.com/">Docker</a> containers as simple as a few clicks. Clocker contains <a href="http://brooklyn.apache.org/v/latest/start/blueprints.html">Brooklyn blueprints</a> to enable deployment and management of <a href="https://www.docker.com/products/docker-swarm">Docker Swarms</a> and <a href="http://kubernetes.io/">Kubernetes clusters</a>.</p>
+
+<h2 id="what-can-you-do-with-it">What can you do with it?</h2>
+
+<ul>
+  <li>You can easily deploy production grade Docker Swarms or Kubernetes clusters to a <a href="http://brooklyn.apache.org/v/latest/ops/locations/index.html">range of clouds</a> (including <a href="https://aws.amazon.com/">AWS</a>, <a href="https://azure.microsoft.com">Azure</a>, <a href="https://cloud.google.com/">Google Cloud</a>, <a href="http://www.softlayer.com/">IBM Softlayer</a>, and <a href="https://www.blueboxcloud.com/">IBM BlueBox</a>).</li>
+  <li>You can manage and scale Swarms or clusters in real time. Automated in-life management will help keep your cluster healthy, by replacing failed nodes and auto-scaling the cluster when overloaded. This can be done as closed-loop or open-loop automation: either responding automatically, or driven by your operations team.</li>
+</ul>
+
+<h2 id="how-to-use-it">How to use it?</h2>
+<p>If you are new to Clocker, you can head for our <a href="tutorials/getting-started.html">Getting Started guide</a>. Otherwise, check out our more <a href="tutorials">in-depth tutorials</a> or simply use our <a href="examples/swarm.yaml" target="blank">yaml example</a> to deploy a swarm cluster to an existing location.</p>
+
+<figure>
+  <img src="/assets/images/quick-launch-amp-swarm.png" alt="Quick launch for Docker Swarm in AMP" />
+  <figcaption>Quick launch for Docker Swarm in AMP</figcaption>
+</figure>
+<figure>
+  <img src="/assets/images/quick-launch-amp-kubernetes.png" alt="Quick launch for Kubernetes in AMP" />
+  <figcaption>Quick launch for Kubernetes cluster in AMP</figcaption>
+</figure>
+<figure>
+  <img src="/assets/images/quick-launch-brooklyn.png" alt="Quick launch for Docker Swarm or Kubernetes in Brooklyn" />
+  <figcaption>Quick launch for Docker Swarm or Kubernetes in Brooklyn</figcaption>
+</figure>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>For any problems please consult the <a href="./docs/troubleshooting.html">troubleshooting section</a>.</p>
+
+<h2 id="license-and-support">License and Support</h2>
+<p>Clocker is released under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2 License</a>.</p>
+
+<p>If you would like a commercial support contract, or professional services assistance when trialling or using Clocker, please <a href="http://www.cloudsoft.io/contact">contact Cloudsoft</a>.</p>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

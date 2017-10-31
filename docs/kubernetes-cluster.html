@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Kubernetes Cluster Documentation</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h3 id="overview">Overview</h3>
+<p>With Clocker, you can easily deploy and manage Kubernetes clusters. They are production-ready infrastructure with TLS, high-availability and extensions like Flannel, Calico and Canal for networking.</p>
+
+<p>Can also connect to existing infrastructure provisioned and managed externally, by specifying appropriate API endpoints.</p>
+
+<h3 id="architecture">Architecture</h3>
+<p><img src="/assets/images/kubernetes-architecture.png" alt="Kubernetes cluster architecture" /></p>
+
+<p>The Kubernetes entity that comes with Clocker will deploy and manage the following components:</p>
+
+<h4 id="kubernetes-cluster">Kubernetes cluster</h4>
+<p>This Kubernetes cluster contains a manager and a configurable number of workers.
+It requires a pre-existing discovery mechanism and references to a CA server entity.
+The cluster has an AutoScalerPolicy and will scale up due to high CPU usage. It also has a replacer policy that will detect the failure and replace the failed worker.</p>
+
+<h4 id="etcd-cluster">etcd Cluster</h4>
+<p>Used as a discovery backend for the Kubernetes cluster.</p>
+
+<h4 id="ca-server">CA Server</h4>
+<p>This is used to provide TLS certificates for the Kubernetes cluster. This component is designed to be easily replaced. It is strongly recommended that this component is replaced with a production grade CA server of your choice.</p>
+
+<h3 id="location">Location</h3>
+<p>Clocker currently supports deployments to <strong>CentOS only</strong>. We recommend to setup a location with the following setting:</p>
+
+<ul>
+  <li>use at least 2GB RAM</li>
+  <li>use a CentOS 7 based image</li>
+</ul>
+
+<p>If you are using Brooklyn, it might a good idea to increase the entropy of your server. This would prevent installation speed being slowed. For more information, see <a href="https://brooklyn.apache.org/v/latest/ops/troubleshooting/increase-entropy.html">Entropy Troubleshooting</a></p>
+
+<p>Finally, be aware that you might get in trouble because of your cloud provider’s security group. For more information, please see the <a href="troubleshooting.html#failed-to-find-machine-unique-group-on-node">troubleshooting page</a>.</p>
+
+<h3 id="configuration">Configuration</h3>
+<p>The Kubernetes entity comes with built-in configuration that allows you to control how your Kubernetes cluster will be deployed and manage.</p>
+
+<h4 id="auto-scaling">Auto scaling</h4>
+<p>There is auto-scaling functionality included with a deployed Kubernetes cluster by default. There is currently no option to scale down. There are some configuration options that control how the scale is performed:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>kubernetes.initial.size</td>
+      <td>The initial size of the Kubernetes cluster</td>
+    </tr>
+    <tr>
+      <td>kubernetes.max.size</td>
+      <td>Maximum size the Kubernetes cluster can be scaled to</td>
+    </tr>
+    <tr>
+      <td>kubernetes.scaling.cpu.limit</td>
+      <td>The percentage limit at which we should scale up. This should be a double value between 0.00 and 1.00</td>
+    </tr>
+    <tr>
+      <td>etcd.initial.size</td>
+      <td>The initial size of Etcd cluster</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="networking">Networking</h4>
+<p>The Kubernetes cluster is automatically setup with an overlay network. This network can be used by containers deployed to the Kubernetes cluster to communicate. There are some configuration options that control networking:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>kubernetes.pod.cidr</td>
+      <td>Pod IP Range to use for the Kubernetes cluster</td>
+    </tr>
+    <tr>
+      <td>kubernetes.service.cidr</td>
+      <td>Kubernetes Service IP Range</td>
+    </tr>
+    <tr>
+      <td>kubernetes.apiserver.port</td>
+      <td>Kubernetes API Server Port</td>
+    </tr>
+    <tr>
+      <td>kubernetes.address</td>
+      <td>Kubernetes IP</td>
+    </tr>
+    <tr>
+      <td>kubernetes.dns.address</td>
+      <td>Kubernetes DNS IP</td>
+    </tr>
+    <tr>
+      <td>kubernetes.dns.domain</td>
+      <td>Kubernetes DNS Domain</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="kubernetes-specific">Kubernetes specific</h4>
+<p>There are some configuration options that control Kubernetes specific parts:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>kubernetes.version</td>
+      <td>Version of Kubernetes to use</td>
+    </tr>
+    <tr>
+      <td>kubernetes.cluster.name</td>
+      <td>Name of the Kubernetes cluster</td>
+    </tr>
+    <tr>
+      <td>kubernetes.user</td>
+      <td>Kubernetes username</td>
+    </tr>
+    <tr>
+      <td>kubernetes.password</td>
+      <td>Kubernetes password</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="troubleshooting">Troubleshooting</h4>
+<p>For any problems please consult the <a href="troubleshooting.html">troubleshooting section here</a>.</p>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

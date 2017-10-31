@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Docker VM Container Documentation</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h3 id="overview">Overview</h3>
+<p>Clocker provides a base <code class="highlighter-rouge">docker-vm-container</code> entity that will deploy a Docker Engine and then start a selected Docker image automatically in it’s Docker container. This entity can be deployed in any cloud / VM location.</p>
+
+<h3 id="configuration">Configuration</h3>
+<p>The Docker VM container entity comes with built-in configuration that allows you to control how your Docker container will be deployed and managed.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>docker.image</td>
+      <td>The docker image to use when running the container</td>
+    </tr>
+    <tr>
+      <td>docker.run.arguments</td>
+      <td>Arguments to pass to the docker run command</td>
+    </tr>
+    <tr>
+      <td>docker.run.volumes</td>
+      <td>List of volumes to mount. Items follow the documented docker format for the ‘-v’ option</td>
+    </tr>
+    <tr>
+      <td>docker.run.env</td>
+      <td>Map of environment variables to pass to the container</td>
+    </tr>
+    <tr>
+      <td>docker.restart</td>
+      <td>Restart policy on the container. One of no, on-failure[:max-retries], always or unless-stopped</td>
+    </tr>
+    <tr>
+      <td>image.run.additionaloptions</td>
+      <td><a href="https://docs.docker.com/engine/reference/run/">Additional options</a> to pass to the ‘docker run’ command</td>
+    </tr>
+  </tbody>
+</table>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

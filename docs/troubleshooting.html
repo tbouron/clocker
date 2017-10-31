@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Troubleshooting</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h3 id="general">General</h3>
+
+<p>You can find below the most common issues (and their solutions) you may face when deploy entities provided by Clocker. For more general troubleshooting, please check out the general <a href="https://brooklyn.apache.org/v/latest/ops/troubleshooting/index.html">troubleshooting</a> or <a href="http://docs.cloudsoft.io/operations/troubleshooting/">AMP</a> docs.</p>
+
+<h4 id="persisted-state">Persisted State</h4>
+
+<p>If you have previously run AMP or Brooklyn you may have to remove the persisted state these have saved on your machine.
+To do this, delete the folder <code class="highlighter-rouge">~/.brooklyn/brooklyn-persisted-state/</code> and all of it’s contents.</p>
+
+<h4 id="aws-vpc--classic">AWS VPC / Classic</h4>
+
+<p>It’s recommended that you use <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html">VPC mode</a> to run Clocker within <a href="http://aws.amazon.com/">AWS</a>. This is because problems have been recorded with DNS and starting instances withn AWS Classic. For more information on doing this, see the <a href="http://brooklyn.apache.org/v/latest/ops/locations/index.html#ec2-classic-problems-with-vpc-only-hardware-instance-types">Brooklyn docs</a>.</p>
+
+<h3 id="aws-401-errors">AWS 401 errors</h3>
+
+<p>If you are getting 401 response errors when trying to provision machines make sure that:</p>
+<ul>
+  <li>The credentials you are using have the permission to create instances</li>
+  <li>You have accepted the TOC for the image you are using in the location definition.
+Go to https://aws.amazon.com/marketplace/pp/B00O7WM7QW and proceed to launch an instance with that image.
+In the process you’ll be asked to accept the TOC. You can abort the launch at this point.</li>
+</ul>
+
+<h4 id="high-cpu-usage">High CPU usage</h4>
+
+<p>After a few hours of management of a swarm or cluster, AMP or Brooklyn may start to suffer from high CPU and memory usage. This is because of a known issue in the Java garbage collection system. To fix this add the following to your AMP or Brooklyn:</p>
+
+<ul class="nav nav-tabs" role="tablist"><li role="presentation" class="active"><a href="#cpu-classic" role="tab" data-toggle="tab">Brooklyn classic</a></li><li role="presentation" class=""><a href="#cpu-karaf" role="tab" data-toggle="tab">AMP / Brooklyn Karaf</a></li></ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="cpu-classic">
+<p>Open <code class="highlighter-rouge">bin/brooklyn</code> and add <code class="highlighter-rouge">-XX:SoftRefLRUPolicyMSPerMB=1</code> to the <code class="highlighter-rouge">JAVA_OPTS</code> line:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">JAVA_OPTS</span><span class="o">=</span><span class="s2">"-Xms256m -Xmx2g -XX:MaxPermSize=256m -XX:SoftRefLRUPolicyMSPerMB=1"</span>
+</code></pre></div></div>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="cpu-karaf">
+<p>Open <code class="highlighter-rouge">bin/setenv</code> and edit or add the following line to the start</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">EXTRA_JAVA_OPTS</span><span class="o">=</span><span class="s2">"-XX:SoftRefLRUPolicyMSPerMB=1 </span><span class="k">${</span><span class="nv">EXTRA_JAVA_OPTS</span><span class="k">}</span><span class="s2">"</span>
+</code></pre></div></div>
+</div>
+
+</div>
+
+<h4 id="ram-usage">RAM Usage</h4>
+
+<p>Launching Clocker within some environments may require RAM to be made available. This can be set to more than <code class="highlighter-rouge">2G</code> by editing the following:</p>
+
+<ul class="nav nav-tabs" role="tablist"><li role="presentation" class="active"><a href="#ram-classic" role="tab" data-toggle="tab">Brooklyn classic</a></li><li role="presentation" class=""><a href="#ram-karaf" role="tab" data-toggle="tab">AMP / Brooklyn Karaf</a></li></ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="ram-classic">
+<p>Open <code class="highlighter-rouge">bin/brooklyn</code> and change the line</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">JAVA_OPTS</span><span class="o">=</span><span class="s2">"-Xms256m -Xmx2g -XX:MaxPermSize=256m"</span>
+</code></pre></div></div>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="ram-karaf">
+<p>Open <code class="highlighter-rouge">bin/setenv</code> and edit or add the line to the start</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">JAVA_MAX_MEM</span><span class="o">=</span><span class="s2">"2G"</span>
+</code></pre></div></div>
+</div>
+
+</div>
+
+<h4 id="failed-to-find-machine-unique-group-on-node">Failed to find machine-unique group on node</h4>
+
+<p>This is caused because of a restrictive security group within your cloud. Add a new piece of config to your swarm or cluster in the form <code class="highlighter-rouge">kubernetes.sharedsecuritygroup.create</code> or <code class="highlighter-rouge">swarm.sharedsecuritygroup.create</code> and set this to <code class="highlighter-rouge">false</code>.</p>
+
+<p>Then create a new security group in your cloud and specify this in your location using the <a href="http://brooklyn.apache.org/v/latest/ops/locations/index.html#vm-creation">securityGroups key</a>.</p>
+
+<p>For more information on setting up a location, see the <a href="../index.html#getting-started">Getting Started</a> guide.</p>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

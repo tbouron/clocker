@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Getting Started guide</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h3 id="overview">Overview</h3>
+
+<p><em>The Clocker blueprints run in Apache Brooklyn. These instructions assume some familiarity with Apache Brooklyn. Appropriate links are included for those new to Brooklyn. For background information, see <a href="http://brooklyn.apache.org/learnmore/theory.html">The Theory Behind Brooklyn</a> and the <a href="http://brooklyn.apache.org/v/latest/start/">Brooklyn Getting Started guide</a>.</em></p>
+
+<p>To use the Clocker blueprints you have two options:</p>
+
+<ul>
+  <li>use them pre-packaged in Cloudsoft AMP (which is built on Brooklyn with additional enterprise features such as a rich UX, blueprint QA, and commercial support). This gives the simplest and fastest user-experience.</li>
+  <li>use Apache Brooklyn, manually adding the Clocker blueprints.</li>
+</ul>
+
+<ul class="nav nav-tabs" role="tablist"><li role="presentation" class="active"><a href="#amp" role="tab" data-toggle="tab">AMP</a></li><li role="presentation" class=""><a href="#brooklyn" role="tab" data-toggle="tab">Brooklyn</a></li></ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="amp">
+<ol>
+  <li><a href="http://www.cloudsoft.io/amp-container-service-early-access">Download AMP</a></li>
+  <li>Install AMP. For more detailed instructions, see the <a href="http://docs.cloudsoft.io/tutorials/tutorial-get-amp-running.html#install-cloudsoft-amp">docs</a>.</li>
+  <li>
+    <p>Open the AMP UI in your favourite web browser (as per the detailed instructions within the link above) and <a href="http://docs.cloudsoft.io/tutorials/tutorial-get-amp-running.html#add-a-location">setup a location</a> for where you want to deploy to (e.g. your preferred cloud, or a list of IPs for pre-existing machines). We came up with location’s templates to add to your catalog, that you can use out of the box for <a href="locations/aws-example-location.bom">AWS</a>, <a href="locations/sl-example-location.bom">SoftLayer</a>, <a href="locations/azure-example-location.bom">Azure</a>, <a href="locations/gce-example-location.bom">GCE</a> and <a href="locations/bb-example-location.bom">Blue Box</a>. For more information, head to the <a href="swarm-cluster.html#setup-a-cloud-location">tutorial section</a>.</p>
+
+    <p><em>Please note that we recommend the <a href="https://wiki.centos.org/Cloud/AWS">official Centos 7 images</a>. Images from other providers may be less functional or incompatible.</em></p>
+  </li>
+  <li>AMP includes a set of quick launch applications, for point-and-click deployment to your favourite location. These include <code class="highlighter-rouge">Docker Swarm with Discovery and CA</code> and <code class="highlighter-rouge">Kubernetes Cluster</code>. Choose the desired application, then your location, and any custom configuration options such as the size of cluster. Then click Deploy.
+  <img src="/assets/images/quick-launch-amp-kubernetes.png" alt="Quick-launch of a Kubernetes cluster" /></li>
+  <li>View your application in the App Dashboard (for a high-level overview) or the App Inspector (for a more detailed view). Once the app is deployed, this will show important information such as the connection details.</li>
+</ol>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="brooklyn">
+<p><em>Clocker relies on some recent Brooklyn features that will be available in the next <strong>0.10.0 release</strong>. Before that release is available, you can either use a <a href="http://download.cloudsoft.io/brooklyn/0.10.0-20160930.1659/brooklyn-dist-0.10.0-20160930.1659-dist.tar.gz">pre-built early access release of Brooklyn</a> or you can <a href="http://brooklyn.apache.org/developers/code/">download the code</a> and <a href="http://brooklyn.apache.org/v/latest/dev/env/maven-build.html">build Brooklyn master from source</a>.</em></p>
+
+<p>The instructions below assume you are using the Brooklyn in the “classic mode” (i.e. not using Karaf). They pick up from where you have the <code class="highlighter-rouge">.tgz</code> or <code class="highlighter-rouge">.zip</code> file).</p>
+
+<ol>
+  <li>Install Apache Brooklyn. For more detailed instructions, see the <a href="http://brooklyn.apache.org/v/latest/start/running.html#install-apache-brooklyn">docs</a>.</li>
+  <li>Download the required Clocker files, and add them to the Brooklyn <code class="highlighter-rouge">./lib/dropins/</code> folder (though these are jar files, the Clocker jars just package resources such as YAML files rather than Java code):
+    <ul>
+      <li><a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&amp;g=io.brooklyn.etcd&amp;a=brooklyn-etcd&amp;v=2.3.0-SNAPSHOT">brooklyn-etcd</a></li>
+      <li><a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&amp;g=io.brooklyn.clocker&amp;a=common&amp;v=2.0.0">common</a></li>
+      <li><a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&amp;g=io.brooklyn.clocker&amp;a=swarm&amp;v=2.0.0">swarm</a></li>
+      <li><a href="https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&amp;g=io.brooklyn.clocker&amp;a=kubernetes&amp;v=2.0.0">kubernetes</a></li>
+    </ul>
+  </li>
+  <li><a href="https://brooklyn.apache.org/v/latest/start/running.html">Launch Brooklyn</a> and add the Clocker blueprints to the catalog by using the <a href="../clocker.bom"><code class="highlighter-rouge">clocker.bom</code> file</a> that lists the catalog items:
+    <ul>
+      <li>If you’d like to use the command line to do this, you will need the <a href="https://brooklyn.apache.org/v/latest/ops/cli/index.html">Apache Brooklyn CLI</a> and run <code class="highlighter-rouge">br add-catalog clocker.bom</code>. For more details, see the <a href="http://brooklyn.apache.org/v/latest/ops/cli/index.html">docs</a>.</li>
+      <li>Alternatively, if you’d like to use the web-console, choose the “Composer” tab, click the “Catalog” button, paste the contents of the <code class="highlighter-rouge">clocker.bom</code> file into the online editor, and click “Deploy”. For more details, see the <a href="http://brooklyn.apache.org/v/latest/ops/catalog/">docs</a>.</li>
+    </ul>
+  </li>
+  <li>
+    <p><a href="http://brooklyn.apache.org/v/latest/ops/locations/">Setup a location</a> for where you want to deploy to. This can be done by defining your location configuration in a .bom file and deploying using the <code class="highlighter-rouge">br</code> CLI. Alternatively, the web-console can be used: click on the Catalog tag, then the “+” button”, choose “Location”, and follow the instructions in the wizard. We came up with location’s templates to add to your catalog, that you can use out of the box for <a href="locations/aws-example-location.bom">AWS</a>, <a href="locations/sl-example-location.bom">SoftLayer</a>, <a href="locations/azure-example-location.bom">Azure</a>, <a href="locations/gce-example-location.bom">GCE</a> and <a href="locations/bb-example-location.bom">Blue Box</a>. For more information, head to the <a href="swarm-cluster.html#setup-a-cloud-location">tutorial section</a>.</p>
+
+    <p><em>Please note that we recommend the <a href="https://wiki.centos.org/Cloud/AWS">official Centos 7 images</a>. Images from other providers may be less functional or incompatible.</em></p>
+  </li>
+  <li>The catalog items added previously will be available in the Brooklyn quick launch. In the web-console, from the Home tab click the “Add application” button, choose your application, then your location, and any custom configuration options such as the size of cluster. Then click Deploy. For more details, see the <a href="http://brooklyn.apache.org/v/latest/ops/gui/blueprints.html#launching-from-the-catalog">docs</a>.
+  <img src="/assets/images/quick-launch-brooklyn.png" alt="Quick-launch of a Swarm or Kubernetes cluster" /></li>
+  <li>View your application in the “Applications” tab. Once the app is deployed, this will show important information such as the connection details. Click on the entity (i.e. component) in the tree view, and the “Sensors” tab to see details of that entity. For more details, the <a href="see http://brooklyn.apache.org/v/latest/ops/gui/managing.html">docs</a>.</li>
+</ol>
+
+</div>
+
+</div>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

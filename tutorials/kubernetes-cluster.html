@@ -1,0 +1,271 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Kubernetes Cluster Tutorial</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h3 id="introduction">Introduction</h3>
+<p>This tutorial is focused on deploying a production ready Kubernetes cluster.</p>
+
+<h3 id="overview">Overview</h3>
+<p>The production ready Kubernetes cluster is comprised of the following components:</p>
+
+<h3 id="pre-requisites">Pre-requisites</h3>
+<p>This tutorial assumes you have completed the <a href="getting-started.html">getting started</a> section of this website and have installed the <a href="https://brooklyn.apache.org/v/latest/ops/cli/index.html">Apache Brooklyn CLI</a>.</p>
+
+<h4 id="kubernetes-cluster">Kubernetes cluster</h4>
+<p>This Kubernetes cluster contains a manager and a configurable number of workers.
+It requires a pre-existing discovery mechanism and references to a CA server entity.
+The cluster has an AutoScalerPolicy and will scale up due to high CPU usage. It also has a replacer policy that will detect the failure and replace the failed worker.</p>
+
+<h4 id="etcd-cluster">etcd Cluster</h4>
+<p>Used as a discovery backend for the Kubernetes cluster.</p>
+
+<h4 id="ca-server">CA Server</h4>
+<p>This is used to provide TLS certificates for the Kubernetes cluster. This component is designed to be easily replaced. It is strongly recommended that this component is replaced with a production grade CA server of your choice.</p>
+
+<h3 id="instructions">Instructions</h3>
+
+<h4 id="setup-a-cloud-location">Setup a cloud location</h4>
+<p>Firstly, we need to setup a location to deploy the Kubernetes cluster to. We recommend the following settings:</p>
+
+<ul>
+  <li>use at least 2GB RAM</li>
+  <li>use a CentOS 7 based image</li>
+</ul>
+
+<p>Please note that we recommend the official Centos 7 images (<a href="https://wiki.centos.org/Cloud/AWS">AWS</a>, <a href="http://cloud.centos.org/centos/7/images/">OpenStack</a>). Images from other providers may be less functional or incompatible.
+For Amazon make sure you’ve accepted the Marketplace Terms and Conditions for the image before using it.</p>
+
+<p>The following catalog items should enable you to quickly get started on some popular clouds. Download the .bom file of the relevant cloud, add your credentials, and then run:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>br add-catalog &lt;CLOUD-PROVIDER&gt;-example-location.bom
+</code></pre></div></div>
+
+<ul class="nav nav-tabs" role="tablist"><li role="presentation" class="active"><a href="#aws" role="tab" data-toggle="tab">AWS</a></li><li role="presentation" class=""><a href="#sl" role="tab" data-toggle="tab">SoftLayer</a></li><li role="presentation" class=""><a href="#azure" role="tab" data-toggle="tab">Azure</a></li><li role="presentation" class=""><a href="#gce" role="tab" data-toggle="tab">GCE</a></li><li role="presentation" class=""><a href="#bb" role="tab" data-toggle="tab">Blue Box</a></li></ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="aws">
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">brooklyn.catalog</span><span class="pi">:</span>
+  <span class="na">id</span><span class="pi">:</span> <span class="s">aws-central-centos7</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">AWS</span><span class="nv"> </span><span class="s">Frankfurt</span><span class="nv"> </span><span class="s">CentOS</span><span class="nv"> </span><span class="s">7"</span>
+  <span class="na">itemType</span><span class="pi">:</span> <span class="s">location</span>
+  <span class="na">item</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">jclouds:aws-ec2</span>
+    <span class="s">brooklyn.config</span><span class="pi">:</span>
+      <span class="na">region</span><span class="pi">:</span> <span class="s">eu-central-1</span>
+      <span class="na">identity</span><span class="pi">:</span> <span class="s">&lt;IDENTITY&gt;</span>
+      <span class="na">credential</span><span class="pi">:</span> <span class="s">&lt;CREDENTIAL&gt;</span>
+      <span class="na">minRam</span><span class="pi">:</span> <span class="s">2000</span>
+
+<span class="c1"># Make sure you've accepted the TOC for the image before using it. To do so</span>
+<span class="c1"># go to https://aws.amazon.com/marketplace/pp/B00O7WM7QW and try to start</span>
+<span class="c1"># an instance with the image. In the process the UI will ask you to accept</span>
+<span class="c1"># the TOC. There is no need to actually launch the instance.</span>
+<span class="c1"># If you have not accepted the TOC you'll get 401 responses from EC2'a API.</span>
+<span class="c1">#</span>
+<span class="c1"># To find the AMIs for different regions go to (login required):</span>
+<span class="c1"># https://aws.amazon.com/marketplace/fulfillment?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e</span>
+<span class="c1"># and click on "Manual Launch". There you'll see a list of regions and the corresponding image IDs.</span>
+      <span class="na">imageId</span><span class="pi">:</span> <span class="s">eu-central-1/ami-9bf712f4</span>
+
+<span class="c1"># Provision a maximum of 3 machines in parallel to avoid hitting the</span>
+<span class="c1"># maximum allowed request limit rate.</span>
+      <span class="na">maxConcurrentMachineCreations</span><span class="pi">:</span> <span class="s">3</span>
+
+      <span class="na">loginUser</span><span class="pi">:</span> <span class="s">centos</span>
+
+</code></pre></div></div>
+<p><a href="locations/aws-example-location.bom" target="blank" class="button download">Download aws-example-location.bom</a></p>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="sl">
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">brooklyn.catalog</span><span class="pi">:</span>
+  <span class="na">id</span><span class="pi">:</span> <span class="s">sl-lon-centos7</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Softlayer</span><span class="nv"> </span><span class="s">London</span><span class="nv"> </span><span class="s">CentOS</span><span class="nv"> </span><span class="s">7"</span>
+  <span class="na">itemType</span><span class="pi">:</span> <span class="s">location</span>
+  <span class="na">item</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">jclouds:softlayer</span>
+    <span class="s">brooklyn.config</span><span class="pi">:</span>
+      <span class="na">region</span><span class="pi">:</span> <span class="s">lon02</span>
+      <span class="na">identity</span><span class="pi">:</span> <span class="s">&lt;IDENTITY&gt;</span>
+      <span class="na">credential</span><span class="pi">:</span> <span class="s">&lt;CREDENTIAL&gt;</span>
+
+      <span class="na">minRam</span><span class="pi">:</span> <span class="s">2000</span>
+      <span class="na">imageId</span><span class="pi">:</span> <span class="s">CENTOS_7_64</span>
+
+
+</code></pre></div></div>
+<p><a href="locations/sl-example-location.bom" target="blank" class="button download">Download sl-example-location.bom</a></p>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="azure">
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">brooklyn.catalog</span><span class="pi">:</span>
+  <span class="na">id</span><span class="pi">:</span> <span class="s">azure</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Azure</span><span class="nv"> </span><span class="s">North</span><span class="nv"> </span><span class="s">Europe"</span>
+  <span class="na">itemType</span><span class="pi">:</span> <span class="s">location</span>
+  <span class="na">item</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">jclouds:azurecompute</span>
+    <span class="s">brooklyn.config</span><span class="pi">:</span>
+      <span class="na">identity</span><span class="pi">:</span> <span class="s">&lt;IDENTITY&gt;</span>
+      <span class="na">credential</span><span class="pi">:</span> <span class="s">&lt;CREDENTIAL&gt;</span>
+      <span class="na">endpoint</span><span class="pi">:</span> <span class="s">&lt;AZURE ENDPOINT&gt;</span>
+      <span class="na">vmNameMaxLength</span><span class="pi">:</span> <span class="s">45</span>
+      <span class="s">jclouds.azurecompute.operation.timeout</span><span class="pi">:</span> <span class="s">120000</span>
+      
+      <span class="c1"># this line disables an invalid openlogic repo</span>
+      <span class="c1"># sudo yum-config-manager --disable openlogic</span>
+      <span class="s">setup.script</span><span class="pi">:</span> <span class="s">data:text/plain;base64,c3VkbyB5dW0tY29uZmlnLW1hbmFnZXIgLS1kaXNhYmxlIG9wZW5sb2dpYw==</span>
+      <span class="na">imageId</span><span class="pi">:</span> <span class="s">5112500ae3b842c8b9c604889f8753c3__OpenLogic-CentOS-72-20160303/North Europe</span>
+
+      <span class="na">regionId</span><span class="pi">:</span> <span class="s">North Europe</span>
+      <span class="na">hardwareId</span><span class="pi">:</span> <span class="s">BASIC_A2</span>
+      <span class="na">loginUser</span><span class="pi">:</span> <span class="s">user</span>
+      <span class="na">templateOptions</span><span class="pi">:</span>
+        <span class="na">overrideAuthenticateSudo</span><span class="pi">:</span> <span class="no">true</span>
+
+
+</code></pre></div></div>
+<p><a href="locations/azure-example-location.bom" target="blank" class="button download">Download azure-example-location.bom</a></p>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="gce">
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">brooklyn.catalog</span><span class="pi">:</span>
+  <span class="na">id</span><span class="pi">:</span> <span class="s">gce-europe-centos7</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Google</span><span class="nv"> </span><span class="s">Compute</span><span class="nv"> </span><span class="s">Engine</span><span class="nv"> </span><span class="s">Europe</span><span class="nv"> </span><span class="s">Centos</span><span class="nv"> </span><span class="s">7"</span>
+  <span class="na">itemType</span><span class="pi">:</span> <span class="s">location</span>
+  <span class="na">item</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">jclouds:google-compute-engine</span>
+    <span class="s">brooklyn.config</span><span class="pi">:</span>
+      <span class="na">imageNameRegex</span><span class="pi">:</span> <span class="s">centos-7.*</span>
+      <span class="na">region</span><span class="pi">:</span> <span class="s">europe-west1-b</span>
+      <span class="na">minRam</span><span class="pi">:</span> <span class="s">2000</span>
+      <span class="na">identity</span><span class="pi">:</span> <span class="s">&lt;IDENTITY&gt;</span>
+
+      <span class="c1"># Use a pre-created everything open network to avoid quota limitations</span>
+      <span class="na">templateOptions</span><span class="pi">:</span>
+        <span class="na">network</span><span class="pi">:</span> <span class="s">&lt;NETWORK&gt;</span>
+
+      <span class="na">credential</span><span class="pi">:</span> <span class="s">&lt;CREDENTIAL&gt;</span>
+
+</code></pre></div></div>
+<p><a href="locations/gce-example-location.bom" target="blank" class="button download">Download gce-example-location.bom</a></p>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="bb">
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">brooklyn.catalog</span><span class="pi">:</span>
+  <span class="na">id</span><span class="pi">:</span> <span class="s">ibm-bluebox-sng-centos7</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">IBM</span><span class="nv"> </span><span class="s">BlueBox</span><span class="nv"> </span><span class="s">Singapore</span><span class="nv"> </span><span class="s">CentOS</span><span class="nv"> </span><span class="s">7"</span>
+  <span class="na">itemType</span><span class="pi">:</span> <span class="s">location</span>
+  <span class="na">item</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">jclouds:openstack-nova</span>
+    <span class="s">brooklyn.config</span><span class="pi">:</span>
+      <span class="na">endpoint</span><span class="pi">:</span> <span class="s">&lt;ENDPOINT&gt;</span>
+      <span class="na">identity</span><span class="pi">:</span>  <span class="s">&lt;IDENTITY&gt;</span>
+      <span class="na">credential</span><span class="pi">:</span> <span class="s">&lt;CREDENTIAL&gt;</span>
+      <span class="s">jclouds.keystone.credential-type</span><span class="pi">:</span> <span class="s">passwordCredentials</span>
+
+      <span class="s">generate.hostname</span><span class="pi">:</span> <span class="no">true</span>
+
+    <span class="c1"># You need to make sure you have a image with name "Centos 7.0"</span>
+      <span class="na">imageNameRegex</span><span class="pi">:</span> <span class="s">CentOS 7</span>
+      <span class="na">loginUser</span><span class="pi">:</span> <span class="s">centos</span>
+      <span class="na">minRam</span><span class="pi">:</span> <span class="s">2000</span>
+
+<span class="c1"># By default open stack will use an existing network</span>
+<span class="c1"># We recommend creating one and specifying below</span>
+      <span class="na">templateOptions</span><span class="pi">:</span>
+        <span class="na">networks</span><span class="pi">:</span>
+         <span class="pi">-</span> <span class="s2">"</span><span class="s">&lt;NETWORK</span><span class="nv"> </span><span class="s">ID&gt;"</span>
+
+<span class="c1"># There are a couple of known issues with auto configuring security groups</span>
+<span class="c1"># on BlueBox using jclouds.  We recommend configuring a security group manually</span>
+<span class="c1"># that allows all internal communication between VMs and inbound traffic on</span>
+<span class="c1"># 22, 8080, and 32768-65534 (for swarm) or 30000-32767 (for kubernetes)</span>
+<span class="c1"># You will also need to set either kubernetes.sharedsecuritygroup.create or</span>
+<span class="c1"># swarm.sharedsecuritygroup.create to false when you deploy the swarm or kubernetes</span>
+
+      <span class="na">securityGroups</span><span class="pi">:</span> <span class="s">&lt;SECURITY GROUP ID&gt;</span>
+
+</code></pre></div></div>
+<p><a href="locations/bb-example-location.bom" target="blank" class="button download">Download bb-example-location.bom</a></p>
+</div>
+
+</div>
+
+<h4 id="deploy-a-kubernetes-cluster">Deploy a Kubernetes Cluster</h4>
+<p>After the location is setup, it is time to deploy a Kubernetes cluster.</p>
+
+<ul class="nav nav-tabs" role="tablist"><li role="presentation" class="active"><a href="#amp" role="tab" data-toggle="tab">AMP</a></li><li role="presentation" class=""><a href="#brooklyn" role="tab" data-toggle="tab">Brooklyn</a></li></ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="amp">
+<p>From your AMP Install, head to the AMP Welcome page. In the quick deploy section select “Kubernetes cluster with a master node and worker nodes” and select the location that that we setup in the previous step Select the location that that we setup in the previous step. You can also change some configuration options such as the minimum and maximum number of nodes. Once you are happy with the configuration, press “Deploy” and your Kubernetes cluster will be created.</p>
+
+<p>See the location example for <a href="locations/bb-example-location.bom">IBM BlueBox</a> and <a href="locations/aws-example-location.bom">AWS</a> for extra config that may be required.</p>
+</div>
+
+<div role="tabpanel" class="tab-pane" id="brooklyn">
+<p>From your Brooklyn Install, head to the Home tab. Click on “Add application” and select “Kubernetes cluster with a master node and worker nodes”, then click on “Next”. Select the location that that we setup in the previous step. You can also change some configuration options such as the minimum and maximum number of nodes. Once you are happy with the configuration, press “Deploy” and your Kubernetes cluster will be created.</p>
+
+<p>See the location example for <a href="locations/bb-example-location.bom">IBM BlueBox</a> and <a href="locations/aws-example-location.bom">AWS</a> for extra config that may be required.</p>
+</div>
+
+</div>
+
+<p>To interact with the Kubernetes cluster, log in into the Kubernetes Dashboard (URL will be available as “main uri” sensor into the brooklyn console)</p>
+
+<h3 id="whats-next">What’s next?</h3>
+<p>Jump into the <a href="/docs/kubernetes-cluster.html">documentation</a> to learn more about kubernetes support in Clocker and have an in-depth overview.</p>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

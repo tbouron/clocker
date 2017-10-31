@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clocker - Docker Swarm Documentation</title>
+
+    <link rel="stylesheet" href="/assets/stylesheets/styles.css">
+    <link rel="stylesheet" href="/assets/stylesheets/tabs.css">
+    <link rel="stylesheet" href="/assets/stylesheets/github-light.css">
+    <link rel="stylesheet" href="/assets/stylesheets/syntax.css">
+    <script src="/assets/javascripts/scale.fix.js"></script>
+    <script src="/assets/javascripts/jquery-3.1.1.min.js"></script>
+    <script src="/assets/javascripts/bootstrap.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header"><a href="/">Clocker</a></h1>
+        <p class="header">The Docker Cloud Maker</p>
+
+        <ul class="menu">
+          <li>
+            <a href="/tutorials">Tutorials</a>
+            <ul>
+              <li><a href="/tutorials/getting-started.html">Getting started</a></li>
+              <li><a href="/tutorials/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/tutorials/kubernetes-cluster.html">Kubernetes cluster</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/docs">Documentation</a>
+            <ul>
+              <li><a href="/docs/swarm-cluster.html">Docker Swarm</a></li>
+              <li><a href="/docs/kubernetes-cluster.html">Kubernetes cluster</a></li>
+              <li><a href="/docs/docker-container.html">Docker container</a></li>
+              <li><a href="/docs/troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+          </li>
+        </ul>
+        <a class="button github" href="https://github.com/brooklyncentral/clocker">View On GitHub</a>
+      </header>
+      <section>
+
+        <h3 id="overview">Overview</h3>
+<p>With Clocker, you can easily deploy and manage Docker Swarm clusters. They are production-ready infrastructure with TLS and high-availability.</p>
+
+<p>You can also connect to existing infrastructure provisioned and managed externally, by specifying appropriate API endpoints.</p>
+
+<h3 id="architecture">Architecture</h3>
+<p><img src="/assets/images/swarm-architecture.png" alt="Docker Swarm architecture" /></p>
+
+<p>The Docker Swarm entity that comes with Clocker will deploy and manage the following components:</p>
+
+<h4 id="a-load-balanced-cluster-of-swarm-managers">A load-balanced cluster of swarm managers</h4>
+<p>Swarm managers control a swarm’s nodes and dictate the node on which containers are deployed.
+We interact directly with the swarm manager cluster’s load balancer as if it were a single docker node.
+The load-balancer will redirect traffic to a healthy manager when a manager fails.  The replacer policy will detect the failure and replace the failed manager.</p>
+
+<h4 id="a-cluster-of-swarm-nodes">A cluster of swarm nodes</h4>
+<p>These nodes are where docker containers are deployed. The cluster has an AutoScalerPolicy and will scale up due to high CPU usage.</p>
+
+<h4 id="etcd-cluster">etcd Cluster</h4>
+<p>Used as a discovery backend for the swarm cluster.</p>
+
+<h4 id="ca-server">CA Server</h4>
+<p>This is used to provide TLS certificates for the swarm cluster. This component is designed to be easily replaced. It is strongly recommended that this component is replaced with a production grade CA server of your choice.</p>
+
+<h3 id="location">Location</h3>
+<p>Clocker currently supports deployments to <strong>CentOS only</strong>. We recommend to setup a location with the following setting:</p>
+
+<ul>
+  <li>use at least 2GB RAM</li>
+  <li>use a CentOS 7 based image</li>
+</ul>
+
+<p>If you are using Brooklyn, it might a good idea to increase the entropy of your server. This would prevent installation speed being slowed. For more information, see <a href="https://brooklyn.apache.org/v/latest/ops/troubleshooting/increase-entropy.html">Entropy Troubleshooting</a></p>
+
+<p>Finally, be aware that you might get in trouble because of your cloud provider’s security group. For more information, please see the <a href="troubleshooting.html#failed-to-find-machine-unique-group-on-node">troubleshooting page</a>.</p>
+
+<h3 id="configuration">Configuration</h3>
+<p>The Docker Swarm entity comes with built-in configuration that allows you to control how your Docker Swarm will be deployed and manage.</p>
+
+<h4 id="auto-scaling">Auto scaling</h4>
+<p>There is auto-scaling functionality included with a deployed Swarm cluster by default. There is currently no option to scale down. There are some configuration options that control how the scale is performed:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>swarm.initial.size</td>
+      <td>The initial number of swarm nodes to create</td>
+    </tr>
+    <tr>
+      <td>swarm.max.size</td>
+      <td>The maximum number of swarm nodes to scale up to</td>
+    </tr>
+    <tr>
+      <td>swarm.scaling.cpu.limit</td>
+      <td>The percentage limit at which we should scale up. This should be a double value between 0.00 and 1.00</td>
+    </tr>
+    <tr>
+      <td>swarm.manager.size</td>
+      <td>The number of swarm managers</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="networking">Networking</h4>
+<p>The Swarm cluster is automatically setup with an overlay network. This network can be used by containers deployed to the swarm cluster to communicate. There are some configuration options that control networking:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>swarm.defaultnetwork</td>
+      <td>The ID of the default network to set. When deploying to this swarm, this network can be used</td>
+    </tr>
+    <tr>
+      <td>swarm.discovery.url</td>
+      <td>URL of a provided discovery mechanism for the swarm</td>
+    </tr>
+    <tr>
+      <td>swarm.port</td>
+      <td>The TCP port the Swarm manager listens on</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="hardware">Hardware</h4>
+<p>The Swarm nodes can be provisioned on with specific hardware requirements. There are some configuration options that control what machines are provisioned:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Config Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>swarm.minCores</td>
+      <td>Minimum CPU cores for provisioning Swarm nodes</td>
+    </tr>
+    <tr>
+      <td>swarm.minRam</td>
+      <td>Minimum RAM for provisioning Swarm nodes</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="troubleshooting">Troubleshooting</h4>
+<p>For any problems please consult the <a href="troubleshooting.html">troubleshooting section here</a>.</p>
+
+
+      </section>
+    <footer>
+      <p class="version"><img src="https://img.shields.io/maven-central/v/io.brooklyn.clocker/clocker-parent.svg" alt="Clocker's version" /></p>
+      <p><small>Proudly sponsored by <a href="http://cloudsoft.io"><img style="width: 100px;" src="/assets/images/cloudsoft-white.png" /></a></small></p>
+    </footer>
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>
